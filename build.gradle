@@ -1,19 +1,56 @@
 plugins {
     id 'java'
+    id 'checkstyle'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'com.application'
-version = '1.0-SNAPSHOT'
+version = '1.0'
 
 repositories {
     mavenCentral()
 }
 
+java {
+    sourceCompatibility = '17'
+}
+
+ext {
+    lombok_v = '1.18.34'
+    postgresql_v = '42.5.1'
+    jsoap_v = '1.15.3'
+    hibernate_v = '6.6.0.Final'
+    jakarta_persistence_v = '3.1.0'
+}
+
 dependencies {
+    implementation 'org.apache.logging.log4j:log4j-core:2.23.1'
+
+    compileOnly "org.projectlombok:lombok:$lombok_v"
+    annotationProcessor "org.projectlombok:lombok:$lombok_v"
+
+    implementation "org.postgresql:postgresql:$postgresql_v"
+    implementation "org.jsoup:jsoup:$jsoap_v"
+
+    implementation "jakarta.persistence:jakarta.persistence-api:$jakarta_persistence_v"
+    implementation "org.hibernate.orm:hibernate-core:$hibernate_v"
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    manifest {
+        attributes(
+                'Main-Class': 'com.application.Application'
+        )
+    }
 }
